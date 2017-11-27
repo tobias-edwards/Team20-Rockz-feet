@@ -8,8 +8,9 @@ import processing.serial.*;
 
 float maxTemp = 100;
 float minTemp = 0;
-float upperLimitT = 100;
-float lowerLimitT;
+float upperLimitT = 80;
+float lowerLimitT = 20;
+int barHeight = 500;
 BarChart barChart;
  
 // Initialises the sketch and loads data into the chart.
@@ -36,7 +37,7 @@ void draw()
 //BAR CANVAS
   fill(255,0,0);
   noStroke();
-  rect(100,(240 - upperLimitT),199,7);
+  rect(100,((100 + barHeight) - upperLimitT),199,7);
   fill(100,149,237);
   noStroke();
   rect(100,440,199,7);
