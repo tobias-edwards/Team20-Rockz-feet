@@ -24,7 +24,9 @@ int limitBarHeight = 7;
 int paddingX = 100;
 int paddingY = 100;
 
+String temp;
 float liveTemp;
+String roundedTemp;
 
 String label;
 int clk =0;
@@ -75,12 +77,15 @@ void setup()
   // Window size
   size(1500,800);
   
+  //Read from serial port.
+  //myPort = new Serial(this,"/dev/cu.usbmodem1451", 9600);
+  
   start_button = new Button("START", 700, 600, 150, 80);
   
   barChart = new BarChart(this);
   
-  liveTemp = 69;
-  barChart.setData(new float[] {69});
+  liveTemp = 80;
+  barChart.setData(new float[] {liveTemp});
   
   barChart.setMinValue(minTemp);
   barChart.setMaxValue(maxTemp);
@@ -103,6 +108,18 @@ void draw()
 {
   // White window background
   background(255);
+
+  //Read data from LaunchPad
+  /* if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
+          {                                    
+              temp = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
+                  if (temp != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                  
+                      println(temp);                       //IF ITS NOT EMPYT IT PRINTS THE VALUE.
+                      liveTemp = float(temp);           //CONVERTS THE INPUT FROM STRING TO A FLOAT SO THAT IT CAN BE PLOT AND STORE IT IN notnullTemp.(MAYBE CHANGE IT TO DOUBLE)
+                  }
+          }  
+  */
 
   // Data bar
   barChart.draw(paddingX, paddingY, barWidth, barHeight);
@@ -128,11 +145,26 @@ void draw()
   textSize(16);
   textAlign(RIGHT);
   limitText(upperLimitT);
+  fill(100,149,237);
   limitText(lowerLimitT);
+  
+  //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
+  roundedTemp = String.format("%.2f",liveTemp);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
+  int rectX = paddingX + barWidth + 20;
+  int rectY = (paddingY + barHeight/2)-(85/2);
+  fill(50);
+  fill(255);
+  rect(rectX, rectY,125,85,10);
+  textSize(22);
+  fill(47,79,79);
+  text("LIVE TEMP",rectX + 117.5,rectY + 25);
+  fill(255,165,0);
+  textSize(20);
+  text(roundedTemp+"°C",rectX + 105,rectY + 60);
   
   //Button
   start_button.Draw();
-
+  
 }
 
 void mousePressed()
