@@ -54,7 +54,7 @@ int paddingXTemp = 100;
 int paddingXPH = 500;
 int paddingXStir = 900;
 
-int paddingY = 100;
+int paddingY = 180;
 
 //Button properties
 String label;
@@ -111,13 +111,13 @@ boolean MouseIsOver() {
 void setup()
 {
   // Window size
-  size(1300,800);
+  size(1300,900);
   
   //Read from serial port.
   //myPort = new Serial(this,"/dev/cu.usbmodem1451", 9600);
   
   start_button = new Button("START", 575, 675, 150, 80);
-  graph_Temp = new Button("GRAPH", paddingXTemp+25, 510, 150, 80);
+  graph_Temp = new Button("GRAPH", paddingXTemp+25, 600, 150, 80);
   graph_PH = new Button("GRAPH", paddingXPH+25, 510, 150, 80);
   graph_Stir = new Button("GRAPH", paddingXStir + 25, 510, 150, 80);
   
@@ -175,6 +175,14 @@ void draw()
 {
   // White window background
   background(255);
+  
+  textSize(32);
+  text("BIOREACTOR CONTROL PANEL", width/2, 30);
+  
+  textSize(24);
+  text("Temperature", width/2, 30);
+  text("pH", width/2, 30);
+  text("Stirring", width/2, 30);
 
   //Read data from LaunchPad
   /* if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
@@ -305,10 +313,10 @@ void draw()
   rect(rectXstir, rectYstir,125,85,10);
   textSize(22);
   fill(47,79,79);
-  text("LIVE RPM",rectXstir + 117.5,rectYstir + 25);
+  text("LIVE RPM",rectXstir + 113,rectYstir + 25);
   fill(255,165,0);
   textSize(20);
-  text(roundedStir+"°C",rectXstir + 105,rectYstir + 60);
+  text(roundedStir,rectXstir + 90,rectYstir + 60);
   
   //Button
   start_button.Draw();
