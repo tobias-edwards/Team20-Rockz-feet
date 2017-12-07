@@ -93,7 +93,7 @@ Button(String labelB, float xpos, float ypos, float widthB, float heightB) {
   fill(218);
   stroke(141);
   rect(x, y, w, h, 10);
-  textSize(40);
+  textSize(24);
   textAlign(CENTER, CENTER);
   fill(0);
   text(label, x + (w / 2), y + (h / 2));
@@ -116,16 +116,16 @@ void setup()
   //Read from serial port.
   //myPort = new Serial(this,"/dev/cu.usbmodem1451", 9600);
   
-  start_button = new Button("START", 575, 675, 150, 80);
+  start_button = new Button("START", 575, 750, 250, 80);
   graph_Temp = new Button("GRAPH", paddingXTemp+25, 600, 150, 80);
-  graph_PH = new Button("GRAPH", paddingXPH+25, 510, 150, 80);
-  graph_Stir = new Button("GRAPH", paddingXStir + 25, 510, 150, 80);
+  graph_PH = new Button("GRAPH", paddingXPH+25, 600, 150, 80);
+  graph_Stir = new Button("GRAPH", paddingXStir + 25, 600, 150, 80);
   
   //Bar chart for the temperature
   
   barTemp = new BarChart(this);
   
-  liveTemp = 80;
+  liveTemp = 40;
   barTemp.setData(new float[] {liveTemp});
   
   barTemp.setMinValue(minTemp);
@@ -138,7 +138,7 @@ void setup()
   
   barPH = new BarChart(this);
   
-  livePH = 10;
+  livePH = 7;
   barPH.setData(new float[] {livePH});
   
   barPH.setMinValue(minPH);
@@ -170,19 +170,30 @@ void limitText(float text, int x, float min, float range) {
   text(nf(text, 0, 0), x-10, paddingY + getY(text, min, range) + 8);
 }
 
+void checkData(float liveData, float lowerLimit, float upperLimit) {
+  if (liveData >= upperLimit) {
+    stroke(255, 0, 0);
+  } else if (liveData <= lowerLimit) {
+    stroke(0, 0, 255);
+  } else {
+    stroke(0, 0, 0);
+  }
+}
+
+
 // Draws the chart in the sketch
 void draw()
 {
   // White window background
   background(255);
   
-  textSize(32);
+  textSize(42);
   text("BIOREACTOR CONTROL PANEL", width/2, 30);
   
-  textSize(24);
-  text("Temperature", width/2, 30);
-  text("pH", width/2, 30);
-  text("Stirring", width/2, 30);
+  textSize(32);
+  text("Temperature", 200, 135);
+  text("pH", width/2 - 50, 135);
+  text("Stirring", 1000, 135);
 
   //Read data from LaunchPad
   /* if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
@@ -213,8 +224,9 @@ void draw()
   rect(paddingXTemp, paddingY + getY(lowerLimitT, minTemp, tempRange), barWidth, limitBarHeight);
 
   // Bar canvas
+  checkData(liveTemp, lowerLimitT, upperLimitT);
+  
   noFill();
-  stroke(2);
   strokeWeight(3);
   rect(paddingXTemp, paddingY, barWidth, barHeight);
 
@@ -234,11 +246,9 @@ void draw()
   fill(255);
   rect(rectX, rectY,125,85,10);
   textSize(22);
-  fill(47,79,79);
-  text("LIVE TEMP",rectX + 117.5,rectY + 25);
-  fill(255,165,0);
+  fill(0,0,0);
   textSize(20);
-  text(roundedTemp+"°C",rectX + 105,rectY + 60);
+  text(roundedTemp+"°C",rectX + 105,rectY + 48);
   
   //Bar chart for PH
   // Upper limit bar Temp
@@ -252,10 +262,12 @@ void draw()
   rect(paddingXPH, paddingY + getY(lowerLimitPH, minPH, phRange), barWidth, limitBarHeight);
 
   // Bar canvas
+  checkData(livePH, lowerLimitPH, upperLimitPH);
   noFill();
-  stroke(2);
   strokeWeight(3);
   rect(paddingXPH, paddingY, barWidth, barHeight);
+  
+  
 
   // Upper limit and lower limit text
   fill(255,0,0);
@@ -273,11 +285,9 @@ void draw()
   fill(255);
   rect(rectXph, rectYph,125,85,10);
   textSize(22);
-  fill(47,79,79);
-  text("LIVE pH",rectXph + 105,rectYph + 25);
-  fill(255,165,0);
+  fill(0, 0, 0);
   textSize(20);
-  text(roundedPH,rectXph + 90,rectYph + 60);
+  text(roundedPH,rectXph + 90,rectYph + 48);
   
   //Bar chart for Stiring
   // Upper limit bar Temp
@@ -291,8 +301,8 @@ void draw()
   rect(paddingXStir, paddingY + getY(lowerLimitS, minStir, stirRange), barWidth, limitBarHeight);
 
   // Bar canvas
+  checkData(liveStir, lowerLimitS, upperLimitS);
   noFill();
-  stroke(2);
   strokeWeight(3);
   rect(paddingXStir, paddingY, barWidth, barHeight);
 
@@ -312,11 +322,9 @@ void draw()
   fill(255);
   rect(rectXstir, rectYstir,125,85,10);
   textSize(22);
-  fill(47,79,79);
-  text("LIVE RPM",rectXstir + 113,rectYstir + 25);
-  fill(255,165,0);
+  fill(0, 0, 0);
   textSize(20);
-  text(roundedStir,rectXstir + 90,rectYstir + 60);
+  text(roundedStir + " rpm",rectXstir + 115,rectYstir + 48);
   
   //Button
   start_button.Draw();
