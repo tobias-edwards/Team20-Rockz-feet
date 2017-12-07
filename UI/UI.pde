@@ -4,30 +4,59 @@ import processing.serial.*;
 
 /* 
 To-do list:
-- create class for bar graphs
--
+- add text box to change the values
+- add graph buttons & do the graphs
 - read live data
-- add labels and live data value text
-*/
 
+*/
+//Temperature Variables
 float maxTemp = 100;
 float minTemp = 0;
 float tempRange = maxTemp - minTemp;
-
-float upperLimitT = 80;
-float lowerLimitT = 20;
-
-int barHeight = 400;
-int barWidth = 200;
-int limitBarHeight = 7;
-
-int paddingX = 100;
-int paddingY = 100;
 
 String temp;
 float liveTemp;
 String roundedTemp;
 
+float upperLimitT = 80;
+float lowerLimitT = 20;
+
+//PH Variables
+float maxPH = 14;
+float minPH = 0;
+float phRange = maxPH - minPH;
+
+String ph;
+float livePH;
+String roundedPH;
+
+float upperLimitPH = 10;
+float lowerLimitPH = 3;
+
+//Stiring Variables
+float maxStir = 100;
+float minStir = 0;
+float stirRange = maxStir - minStir;
+
+String stir;
+float liveStir;
+String roundedStir;
+
+float upperLimitS = 80;
+float lowerLimitS = 20;
+
+//Bar chart properties
+int barHeight = 400;
+int barWidth = 200;
+int limitBarHeight = 7;
+
+int paddingXTemp = 100;
+int paddingXPH = 500;
+int paddingXStir = 900;
+
+int paddingY = 100;
+
+//Button properties
 String label;
 int clk =0;
 
@@ -35,12 +64,19 @@ int clk =0;
 Serial myPort;
 
 Button start_button;
+Button graph_Temp;
+Button graph_PH;
+Button graph_Stir;
 
-BarChart barChart;
+BarChart barTemp;
+BarChart barPH;
+BarChart barStir;
+
 
 //Class used to create START/STOP button. 
 class Button {
 
+String label;
 float x;    // top left corner x position
 float y;    // top left corner y position
 float w;    // width of button
@@ -62,7 +98,7 @@ Button(String labelB, float xpos, float ypos, float widthB, float heightB) {
   fill(0);
   text(label, x + (w / 2), y + (h / 2));
 }
-  
+
 boolean MouseIsOver() {
     if (mouseX > x && mouseX < (x + w) && mouseY > y && mouseY < (y + h)) {
       return true;
@@ -75,32 +111,63 @@ boolean MouseIsOver() {
 void setup()
 {
   // Window size
-  size(1500,800);
+  size(1300,800);
   
   //Read from serial port.
   //myPort = new Serial(this,"/dev/cu.usbmodem1451", 9600);
   
-  start_button = new Button("START", 700, 600, 150, 80);
+  start_button = new Button("START", 575, 675, 150, 80);
+  graph_Temp = new Button("GRAPH", paddingXTemp+25, 510, 150, 80);
+  graph_PH = new Button("GRAPH", paddingXPH+25, 510, 150, 80);
+  graph_Stir = new Button("GRAPH", paddingXStir + 25, 510, 150, 80);
   
-  barChart = new BarChart(this);
+  //Bar chart for the temperature
+  
+  barTemp = new BarChart(this);
   
   liveTemp = 80;
-  barChart.setData(new float[] {liveTemp});
+  barTemp.setData(new float[] {liveTemp});
   
-  barChart.setMinValue(minTemp);
-  barChart.setMaxValue(maxTemp);
+  barTemp.setMinValue(minTemp);
+  barTemp.setMaxValue(maxTemp);
      
-  barChart.showValueAxis(false);
-  barChart.showCategoryAxis(false);
+  barTemp.showValueAxis(false);
+  barTemp.showCategoryAxis(false);
+  
+  //Bar chart for the PH value
+  
+  barPH = new BarChart(this);
+  
+  livePH = 10;
+  barPH.setData(new float[] {livePH});
+  
+  barPH.setMinValue(minPH);
+  barPH.setMaxValue(maxPH);
+     
+  barPH.showValueAxis(false);
+  barPH.showCategoryAxis(false);
+  
+  //Bar chart for the stiring
+  
+  barStir = new BarChart(this);
+  
+  liveStir = 80;
+  barStir.setData(new float[] {liveStir});
+  
+  barStir.setMinValue(minStir);
+  barStir.setMaxValue(maxStir);
+     
+  barStir.showValueAxis(false);
+  barStir.showCategoryAxis(false);
 }
 
-float getY(float y) {
-  float percentage = (y + minTemp) / tempRange;
+float getY(float y, float min, float range) {
+  float percentage = (y + min) / range;
   return barHeight * (1 - percentage);
 }
 
-void limitText(float text) {
-  text(nf(text, 0, 0), 90, paddingY + getY(text) + 8);
+void limitText(float text, int x, float min, float range) {
+  text(nf(text, 0, 0), x-10, paddingY + getY(text, min, range) + 8);
 }
 
 // Draws the chart in the sketch
@@ -122,35 +189,38 @@ void draw()
   */
 
   // Data bar
-  barChart.draw(paddingX, paddingY, barWidth, barHeight);
-
-  // Upper limit bar
+  barTemp.draw(paddingXTemp, paddingY, barWidth, barHeight);
+  barPH.draw(paddingXPH, paddingY, barWidth, barHeight);
+  barStir.draw(paddingXStir, paddingY, barWidth, barHeight);
+  
+  //Bar chart Temperature
+  // Upper limit bar Temp
   fill(255,0,0);
   noStroke();
-  rect(paddingX, paddingY + getY(upperLimitT), barWidth, limitBarHeight);
+  rect(paddingXTemp, paddingY + getY(upperLimitT, minTemp, tempRange), barWidth, limitBarHeight);
 
   // Lower limit Bar
   fill(100,149,237);
   noStroke();
-  rect(paddingX, paddingY + getY(lowerLimitT), barWidth, limitBarHeight);
+  rect(paddingXTemp, paddingY + getY(lowerLimitT, minTemp, tempRange), barWidth, limitBarHeight);
 
   // Bar canvas
   noFill();
   stroke(2);
   strokeWeight(3);
-  rect(paddingX, paddingY, barWidth, barHeight);
+  rect(paddingXTemp, paddingY, barWidth, barHeight);
 
   // Upper limit and lower limit text
   fill(255,0,0);
   textSize(16);
   textAlign(RIGHT);
-  limitText(upperLimitT);
+  limitText(upperLimitT, paddingXTemp, minTemp, tempRange);
   fill(100,149,237);
-  limitText(lowerLimitT);
+  limitText(lowerLimitT, paddingXTemp, minTemp, tempRange);
   
   //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
   roundedTemp = String.format("%.2f",liveTemp);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
-  int rectX = paddingX + barWidth + 20;
+  int rectX = paddingXTemp + barWidth + 20;
   int rectY = (paddingY + barHeight/2)-(85/2);
   fill(50);
   fill(255);
@@ -162,8 +232,89 @@ void draw()
   textSize(20);
   text(roundedTemp+"°C",rectX + 105,rectY + 60);
   
+  //Bar chart for PH
+  // Upper limit bar Temp
+  fill(255,0,0);
+  noStroke();
+  rect(paddingXPH, paddingY + getY(upperLimitPH, minPH, phRange), barWidth, limitBarHeight);
+
+  // Lower limit Bar
+  fill(100,149,237);
+  noStroke();
+  rect(paddingXPH, paddingY + getY(lowerLimitPH, minPH, phRange), barWidth, limitBarHeight);
+
+  // Bar canvas
+  noFill();
+  stroke(2);
+  strokeWeight(3);
+  rect(paddingXPH, paddingY, barWidth, barHeight);
+
+  // Upper limit and lower limit text
+  fill(255,0,0);
+  textSize(16);
+  textAlign(RIGHT);
+  limitText(upperLimitPH, paddingXPH, minPH, phRange);
+  fill(100,149,237);
+  limitText(lowerLimitPH, paddingXPH, minPH, phRange);
+  
+  //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
+  roundedPH = String.format("%.2f",livePH);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
+  int rectXph = paddingXPH + barWidth + 20;
+  int rectYph = (paddingY + barHeight/2)-(85/2);
+  fill(50);
+  fill(255);
+  rect(rectXph, rectYph,125,85,10);
+  textSize(22);
+  fill(47,79,79);
+  text("LIVE pH",rectXph + 105,rectYph + 25);
+  fill(255,165,0);
+  textSize(20);
+  text(roundedPH,rectXph + 90,rectYph + 60);
+  
+  //Bar chart for Stiring
+  // Upper limit bar Temp
+  fill(255,0,0);
+  noStroke();
+  rect(paddingXStir, paddingY + getY(upperLimitS, minStir, stirRange), barWidth, limitBarHeight);
+
+  // Lower limit Bar
+  fill(100,149,237);
+  noStroke();
+  rect(paddingXStir, paddingY + getY(lowerLimitS, minStir, stirRange), barWidth, limitBarHeight);
+
+  // Bar canvas
+  noFill();
+  stroke(2);
+  strokeWeight(3);
+  rect(paddingXStir, paddingY, barWidth, barHeight);
+
+  // Upper limit and lower limit text
+  fill(255,0,0);
+  textSize(16);
+  textAlign(RIGHT);
+  limitText(upperLimitS, paddingXStir, minStir, stirRange);
+  fill(100,149,237);
+  limitText(lowerLimitS, paddingXStir, minStir, stirRange);
+  
+  //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
+  roundedStir = String.format("%.2f",liveStir);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
+  int rectXstir = paddingXStir + barWidth + 20;
+  int rectYstir = (paddingY + barHeight/2)-(85/2);
+  fill(50);
+  fill(255);
+  rect(rectXstir, rectYstir,125,85,10);
+  textSize(22);
+  fill(47,79,79);
+  text("LIVE RPM",rectXstir + 117.5,rectYstir + 25);
+  fill(255,165,0);
+  textSize(20);
+  text(roundedStir+"°C",rectXstir + 105,rectYstir + 60);
+  
   //Button
   start_button.Draw();
+  graph_Temp.Draw();
+  graph_PH.Draw();
+  graph_Stir.Draw();
   
 }
 
@@ -173,12 +324,12 @@ void mousePressed()
     clk++;
     if(clk % 2 == 0) 
     {
-      label = "START";
+      start_button.label = "START";
       //myPort.write('1'); 
     } 
     else 
     {
-      label = "STOP";
+      start_button.label = "STOP";
       //myPort.write(0); 
     }
   }
