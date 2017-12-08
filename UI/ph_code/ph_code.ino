@@ -28,7 +28,7 @@ void loop()
   int currentTime = millis();
   int pH = 3.42 * analogRead(phProbe ) + 60.8;
   pHval = (pHbaseline - pH)/sensitivity;
-  Serial.println(pH);
+  Serial.println(pHval);
   if(pH>higherBound)
   {
     openPump(acidPump );
