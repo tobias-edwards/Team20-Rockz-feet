@@ -56,6 +56,9 @@ int paddingXStir = 900;
 
 int paddingY = 180;
 
+// Store variable for display
+int display_number = 1;
+
 //Button properties
 String label;
 int clk =0;
@@ -67,6 +70,7 @@ Button start_button;
 Button graph_Temp;
 Button graph_PH;
 Button graph_Stir;
+Button return_home;
 
 BarChart barTemp;
 BarChart barPH;
@@ -120,6 +124,7 @@ void setup()
   graph_Temp = new Button("GRAPH", paddingXTemp+25, 600, 150, 80);
   graph_PH = new Button("GRAPH", paddingXPH+25, 600, 150, 80);
   graph_Stir = new Button("GRAPH", paddingXStir + 25, 600, 150, 80);
+  return_home = new Button("HOME", 100, 100, 250, 80);
   
   //Bar chart for the temperature
   
@@ -184,6 +189,7 @@ void checkData(float liveData, float lowerLimit, float upperLimit) {
 // Draws the chart in the sketch
 void draw()
 {
+if ( display_number == 1) {
   // White window background
   background(255);
   
@@ -194,7 +200,7 @@ void draw()
   text("Temperature", 200, 135);
   text("pH", width/2 - 50, 135);
   text("Stirring", 1000, 135);
-
+  
   //Read data from LaunchPad
   /* if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
           {                                    
@@ -206,7 +212,7 @@ void draw()
                   }
           }  
   */
-
+  
   // Data bar
   barTemp.draw(paddingXTemp, paddingY, barWidth, barHeight);
   barPH.draw(paddingXPH, paddingY, barWidth, barHeight);
@@ -217,19 +223,19 @@ void draw()
   fill(255,0,0);
   noStroke();
   rect(paddingXTemp, paddingY + getY(upperLimitT, minTemp, tempRange), barWidth, limitBarHeight);
-
+  
   // Lower limit Bar
   fill(100,149,237);
   noStroke();
   rect(paddingXTemp, paddingY + getY(lowerLimitT, minTemp, tempRange), barWidth, limitBarHeight);
-
+  
   // Bar canvas
   checkData(liveTemp, lowerLimitT, upperLimitT);
   
   noFill();
   strokeWeight(3);
   rect(paddingXTemp, paddingY, barWidth, barHeight);
-
+  
   // Upper limit and lower limit text
   fill(255,0,0);
   textSize(16);
@@ -255,12 +261,12 @@ void draw()
   fill(255,0,0);
   noStroke();
   rect(paddingXPH, paddingY + getY(upperLimitPH, minPH, phRange), barWidth, limitBarHeight);
-
+  
   // Lower limit Bar
   fill(100,149,237);
   noStroke();
   rect(paddingXPH, paddingY + getY(lowerLimitPH, minPH, phRange), barWidth, limitBarHeight);
-
+  
   // Bar canvas
   checkData(livePH, lowerLimitPH, upperLimitPH);
   noFill();
@@ -268,7 +274,7 @@ void draw()
   rect(paddingXPH, paddingY, barWidth, barHeight);
   
   
-
+  
   // Upper limit and lower limit text
   fill(255,0,0);
   textSize(16);
@@ -294,18 +300,18 @@ void draw()
   fill(255,0,0);
   noStroke();
   rect(paddingXStir, paddingY + getY(upperLimitS, minStir, stirRange), barWidth, limitBarHeight);
-
+  
   // Lower limit Bar
   fill(100,149,237);
   noStroke();
   rect(paddingXStir, paddingY + getY(lowerLimitS, minStir, stirRange), barWidth, limitBarHeight);
-
+  
   // Bar canvas
   checkData(liveStir, lowerLimitS, upperLimitS);
   noFill();
   strokeWeight(3);
   rect(paddingXStir, paddingY, barWidth, barHeight);
-
+  
   // Upper limit and lower limit text
   fill(255,0,0);
   textSize(16);
@@ -331,7 +337,35 @@ void draw()
   graph_Temp.Draw();
   graph_PH.Draw();
   graph_Stir.Draw();
+  } else if (display_number == 2) {
+    // Display graph for temperature
+    // White window background
+    background(255);
   
+    textSize(42);
+    text("BIOREACTOR CONTROL PANEL", width/2, 30);
+    return_home.Draw();
+    
+    return_home.Draw();
+  } else if (display_number == 3) {
+    // Display graph for pH
+    // White window background
+    background(255);
+  
+    textSize(42);
+    text("BIOREACTOR CONTROL PANEL", width/2, 30);
+    return_home.Draw();  
+  } else if (display_number == 4) {
+    // Display graph for stirring
+    
+    
+    // White window background
+    background(255);
+  
+    textSize(42);
+    text("BIOREACTOR CONTROL PANEL", width/2, 30);
+    return_home.Draw();
+  }
 }
 
 void mousePressed()
@@ -348,5 +382,13 @@ void mousePressed()
       start_button.label = "STOP";
       //myPort.write(0); 
     }
+  } else if (graph_Temp.MouseIsOver()) {
+    display_number = 2;
+  } else if (graph_PH.MouseIsOver()) {
+    display_number = 3;
+  } else if (graph_Stir.MouseIsOver()) {
+    display_number = 4;
+  } else if (return_home.MouseIsOver()) {
+    display_number = 1;
   }
 }
