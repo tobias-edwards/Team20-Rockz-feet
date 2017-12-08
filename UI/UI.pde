@@ -4,10 +4,8 @@ import processing.serial.*;
 
 /* 
 To-do list:
-- add text box to change the values
-- add graph buttons & do the graphs
-- read live data
-
+- add text box to change the values (upper limits / lower limits
+- read live data DONE but does it work?
 */
 //Temperature Variables
 float maxTemp = 100;
@@ -76,6 +74,15 @@ BarChart barTemp;
 BarChart barPH;
 BarChart barStir;
 
+//Line graphs
+GPlot plotTemp,plotStir,plotPH;
+int points = 60;
+int i;
+long lastMillis = 0;  
+int delay = 1000;
+int totalPoints = 60;
+String tempLine,phLine,stirLine;
+float notnullTemp,notnullPH,notnullStir;
 
 //Class used to create START/STOP button. 
 class Button {
@@ -120,11 +127,11 @@ void setup()
   //Read from serial port.
   //myPort = new Serial(this,"/dev/cu.usbmodem1451", 9600);
   
-  start_button = new Button("START", 575, 750, 250, 80);
+  start_button = new Button("START", ((width/2)-125), 750, 250, 80);
   graph_Temp = new Button("GRAPH", paddingXTemp+25, 600, 150, 80);
   graph_PH = new Button("GRAPH", paddingXPH+25, 600, 150, 80);
   graph_Stir = new Button("GRAPH", paddingXStir + 25, 600, 150, 80);
-  return_home = new Button("HOME", 100, 100, 250, 80);
+  return_home = new Button("HOME", ((width/2)-125), 775, 250, 80);
   
   //Bar chart for the temperature
   
@@ -164,6 +171,81 @@ void setup()
      
   barStir.showValueAxis(false);
   barStir.showCategoryAxis(false);
+  
+    //Line graph for Temperature
+  
+  //CREATE GRAPH POINTS FOR TEMP
+  GPointsArray points1 = new GPointsArray(points);
+  
+  //ASSIGN INITIAL VALUES TO ALL POINTS
+for (i = 0; i < points; i++) 
+  {
+      points1.add(i,1000);
+  }
+  
+  //CREATE PLOT TEMP
+  plotTemp = new GPlot(this);
+  plotTemp.setPos(25, 100); 
+  plotTemp.setDim(1150, 550); 
+  //Set axes limits
+  plotTemp.setXLim(0, totalPoints);
+  plotTemp.setYLim(0, 100);
+  //SET PLOT 1 TITLE AND AXIS LABELS
+  plotTemp.setTitleText(""); 
+  plotTemp.getXAxis().setAxisLabelText("Time (in seconds)");
+  plotTemp.getYAxis().setAxisLabelText("Temperature (in °C)");
+  //ADD THE POINTS ARRAY TO PLOT 1
+  plotTemp.setPoints(points1);
+  
+  //Line graph for PH
+  
+  //CREATE GRAPH POINTS FOR TEMP
+  GPointsArray points2 = new GPointsArray(points);
+  
+  //ASSIGN INITIAL VALUES TO ALL POINTS
+for (i = 0; i < points; i++) 
+  {
+      points2.add(i,1000);
+  }
+  
+  //CREATE PLOT PH
+  plotPH = new GPlot(this);
+  plotPH.setPos(25, 100); 
+  plotPH.setDim(1150, 550); 
+  //Set axes limits
+  plotPH.setXLim(0, totalPoints);
+  plotPH.setYLim(0, 14);
+  //SET PLOT 1 TITLE AND AXIS LABELS
+  plotPH.setTitleText(""); 
+  plotPH.getXAxis().setAxisLabelText("Time (in seconds)");
+  plotPH.getYAxis().setAxisLabelText("PH SCALE");
+  //ADD THE POINTS ARRAY TO PLOT 1
+  plotPH.setPoints(points2);
+  
+  //Line graph for Stirring
+  
+  //CREATE GRAPH POINTS FOR TEMP
+  GPointsArray points3 = new GPointsArray(points);
+  
+  //ASSIGN INITIAL VALUES TO ALL POINTS
+for (i = 0; i < points; i++) 
+  {
+      points3.add(i,5000);
+  }
+  
+  //CREATE PLOT STIR
+  plotStir = new GPlot(this);
+  plotStir.setPos(25, 100); 
+  plotStir.setDim(1150, 550); 
+  //Set axes limits
+  plotStir.setXLim(0, totalPoints);
+  plotStir.setYLim(0, 1000);
+  //SET PLOT 3 TITLE AND AXIS LABELS
+  plotStir.setTitleText(""); 
+  plotStir.getXAxis().setAxisLabelText("Time (in seconds)");
+  plotStir.getYAxis().setAxisLabelText("Stirring Speed in RPM");
+  //ADD THE POINTS ARRAY TO PLOT 1
+  plotStir.setPoints(points3);
 }
 
 float getY(float y, float min, float range) {
@@ -194,24 +276,12 @@ if ( display_number == 1) {
   background(255);
   
   textSize(42);
-  text("BIOREACTOR CONTROL PANEL", width/2, 30);
+  text("BIOREACTOR CONTROL PANEL", width/2, 50);
   
   textSize(32);
   text("Temperature", 200, 135);
   text("pH", width/2 - 50, 135);
   text("Stirring", 1000, 135);
-  
-  //Read data from LaunchPad
-  /* if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
-          {                                    
-              temp = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
-                  if (temp != null)                //CHECKS IF THE INPUT IS EMPTY(null).
-                  {                  
-                      println(temp);                       //IF ITS NOT EMPYT IT PRINTS THE VALUE.
-                      liveTemp = float(temp);           //CONVERTS THE INPUT FROM STRING TO A FLOAT SO THAT IT CAN BE PLOT AND STORE IT IN notnullTemp.(MAYBE CHANGE IT TO DOUBLE)
-                  }
-          }  
-  */
   
   // Data bar
   barTemp.draw(paddingXTemp, paddingY, barWidth, barHeight);
@@ -343,8 +413,53 @@ if ( display_number == 1) {
     background(255);
   
     textSize(42);
-    text("BIOREACTOR CONTROL PANEL", width/2, 30);
-    return_home.Draw();
+    text("TEMPERATURE LINE GRAPH", width/2, 50);
+    
+  plotTemp.beginDraw();
+  plotTemp.drawBackground();
+  plotTemp.drawBox();
+  plotTemp.drawXAxis();
+  plotTemp.drawYAxis();
+  plotTemp.drawTopAxis();
+  plotTemp.drawRightAxis();
+  plotTemp.drawTitle();
+  plotTemp.setPointColor(color(0,0,255));
+  plotTemp.getMainLayer().drawPoints();
+  //plot.drawLines();
+  plotTemp.endDraw();
+
+//CHECK IF i HAS EXCEEDED THE X AXIS LIMIT IN ORDER TO RESET IT.
+if (i > totalPoints)
+  {
+    i=0; //RESETS i TO ZERO.
+  }
+
+/*//GET THE NEW VALUE FROM SERIAL INPUT
+if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT THE SAME DELAY WITH THE ARDUINO EACH TIME.
+  {
+      myPort.write(0);                    //SENDS THE VALUE 0 BACK TO THE ARDUINO TO TURN THE LED OFF.
+      if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
+          {                                    
+              tempLine = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
+                  if (tempLine != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                  
+                      println(tempLine);                       //IF ITS NOT EMPYT IT PRINTS THE VALUE.
+                      notnullTemp = float(tempLine);           //CONVERTS THE INPUT FROM STRING TO A FLOAT SO THAT IT CAN BE PLOT AND STORE IT IN notnullTemp.(MAYBE CHANGE IT TO DOUBLE)
+                  }
+ 
+          }  
+  
+
+  //ADD THE NEW POINT AT THE END OF THE ARRAY.
+   i++;
+  plotTemp.addPoint(i,notnullTemp);
+ 
+  //REMOVE THE FIRST POINT TO MAKE ROOM FOR THE NEW POINT.
+  plotTemp.removePoint(0);
+
+  //INCREMENTS THE X AXIS VALUE.
+  lastMillis += delay;
+  } */
     
     return_home.Draw();
   } else if (display_number == 3) {
@@ -353,17 +468,108 @@ if ( display_number == 1) {
     background(255);
   
     textSize(42);
-    text("BIOREACTOR CONTROL PANEL", width/2, 30);
+    text("PH LINE GRAPH", width/2, 50);
+    
+  plotPH.beginDraw();
+  plotPH.drawBackground();
+  plotPH.drawBox();
+  plotPH.drawXAxis();
+  plotPH.drawYAxis();
+  plotPH.drawTopAxis();
+  plotPH.drawRightAxis();
+  plotPH.drawTitle();
+  plotPH.setPointColor(color(0,0,255));
+  plotPH.getMainLayer().drawPoints();
+  //plot.drawLines();
+  plotPH.endDraw();
+
+//CHECK IF i HAS EXCEEDED THE X AXIS LIMIT IN ORDER TO RESET IT.
+if (i > totalPoints)
+  {
+    i=0; //RESETS i TO ZERO.
+  }
+
+/*//GET THE NEW VALUE FROM SERIAL INPUT
+if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT THE SAME DELAY WITH THE ARDUINO EACH TIME.
+  {
+      myPort.write(0);                    //SENDS THE VALUE 0 BACK TO THE ARDUINO TO TURN THE LED OFF.
+      if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
+          {                                    
+              phLine = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
+                  if (phLine != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                  
+                      println(phLine);                       //IF ITS NOT EMPYT IT PRINTS THE VALUE.
+                      notnullPH = float(phLine);           //CONVERTS THE INPUT FROM STRING TO A FLOAT SO THAT IT CAN BE PLOT AND STORE IT IN notnullTemp.(MAYBE CHANGE IT TO DOUBLE)
+                  }
+ 
+          }  
+  
+
+  //ADD THE NEW POINT AT THE END OF THE ARRAY.
+   i++;
+  plotPH.addPoint(i,notnullPH);
+ 
+  //REMOVE THE FIRST POINT TO MAKE ROOM FOR THE NEW POINT.
+  plotPH.removePoint(0);
+
+  //INCREMENTS THE X AXIS VALUE.
+  lastMillis += delay;
+  } */
     return_home.Draw();  
   } else if (display_number == 4) {
     // Display graph for stirring
-    
-    
     // White window background
     background(255);
-  
+    
     textSize(42);
-    text("BIOREACTOR CONTROL PANEL", width/2, 30);
+    text("STIRRING LINE GRAPH", width/2, 50);
+    
+  plotStir.beginDraw();
+  plotStir.drawBackground();
+  plotStir.drawBox();
+  plotStir.drawXAxis();
+  plotStir.drawYAxis();
+  plotStir.drawTopAxis();
+  plotStir.drawRightAxis();
+  plotStir.drawTitle();
+  plotStir.setPointColor(color(0,0,255));
+  plotStir.getMainLayer().drawPoints();
+  //plot.drawLines();
+  plotStir.endDraw();
+
+//CHECK IF i HAS EXCEEDED THE X AXIS LIMIT IN ORDER TO RESET IT.
+if (i > totalPoints)
+  {
+    i=0; //RESETS i TO ZERO.
+  }
+
+/*//GET THE NEW VALUE FROM SERIAL INPUT
+if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT THE SAME DELAY WITH THE ARDUINO EACH TIME.
+  {
+      myPort.write(0);                    //SENDS THE VALUE 0 BACK TO THE ARDUINO TO TURN THE LED OFF.
+      if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
+          {                                    
+              stirLine = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
+                  if (stirLine != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                  
+                      println(stirLine);                       //IF ITS NOT EMPYT IT PRINTS THE VALUE.
+                      notnullStir = float(stirLine);           //CONVERTS THE INPUT FROM STRING TO A FLOAT SO THAT IT CAN BE PLOT AND STORE IT IN notnullTemp.(MAYBE CHANGE IT TO DOUBLE)
+                  }
+ 
+          }  
+  
+
+  //ADD THE NEW POINT AT THE END OF THE ARRAY.
+   i++;
+  plotStir.addPoint(i,notnullStir);
+ 
+  //REMOVE THE FIRST POINT TO MAKE ROOM FOR THE NEW POINT.
+  plotStir.removePoint(0);
+
+  //INCREMENTS THE X AXIS VALUE.
+  lastMillis += delay;
+  } */
+    
     return_home.Draw();
   }
 }
