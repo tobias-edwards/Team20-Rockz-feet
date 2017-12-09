@@ -4,7 +4,7 @@ import processing.serial.*;
 
 /* 
 To-do list:
-- add text box to change the values (upper limits / lower limits
+- add text box to change the values (upper limits / lower limits)
 - read live data DONE but does it work?
 */
 
@@ -137,8 +137,7 @@ void setup()
   //Bar chart for the temperature
   
   barTemp = new BarChart(this);
-  
-  liveTemp = 40;
+ 
   barTemp.setData(new float[] {liveTemp});
   
   barTemp.setMinValue(minTemp);
@@ -344,7 +343,13 @@ if ( display_number == 1) {
   strokeWeight(3);
   rect(paddingXPH, paddingY, barWidth, barHeight);
   
-  
+  //Values for PH
+  livePH = myPort.readStringUntil('\n');
+  if (livePH != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                  
+                      notnullPH = float(livePH);
+                      barPH.setData(new float[] {notnullPH});
+                  }
   
   // Upper limit and lower limit text
   fill(255,0,0);
@@ -355,7 +360,7 @@ if ( display_number == 1) {
   limitText(lowerLimitPH, paddingXPH, minPH, phRange);
   
   //BOX NEXT TO GRAPH SHOWING LIVE LEVELS
-  roundedPH = String.format("%.2f",livePH);   //ROUNDS THE VALUE FOR PH TO 2 DECIMAL PLACES.
+  roundedPH = String.format("%.2f",notnullPH);   //ROUNDS THE VALUE FOR PH TO 2 DECIMAL PLACES.
   int rectXph = paddingXPH + barWidth + 20;
   int rectYph = (paddingY + barHeight/2)-(85/2);
   fill(50);
