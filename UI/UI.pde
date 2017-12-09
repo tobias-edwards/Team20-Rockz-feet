@@ -4,10 +4,9 @@ import processing.serial.*;
 
 /* 
 To-do list:
-- add text box to change the values (upper limits / lower limits)
+- add text box to change the values (upper limits / lower limits
 - read live data DONE but does it work?
 */
-
 //Temperature Variables
 float maxTemp = 100;
 float minTemp = 0;
@@ -26,7 +25,7 @@ float minPH = 0;
 float phRange = maxPH - minPH;
 
 String ph;
-float livePH;
+String livePH;
 String roundedPH;
 
 float upperLimitPH = 10;
@@ -64,6 +63,7 @@ int clk =0;
 
 //SERIAL PORT
 Serial myPort;
+
 
 Button start_button;
 Button graph_Temp;
@@ -126,7 +126,8 @@ void setup()
   size(1300,900);
   
   //Read from serial port.
-  //myPort = new Serial(this,"/dev/cu.usbmodem1451", 9600);
+  myPort = new Serial(this,"/dev/cu.uart-F2FF54D137142D5C", 9600);
+  myPort.bufferUntil('\n');
   
   start_button = new Button("START", ((width/2)-125), 750, 250, 80);
   graph_Temp = new Button("GRAPH", paddingXTemp+25, 600, 150, 80);
@@ -137,7 +138,8 @@ void setup()
   //Bar chart for the temperature
   
   barTemp = new BarChart(this);
- 
+  
+  liveTemp = 40;
   barTemp.setData(new float[] {liveTemp});
   
   barTemp.setMinValue(minTemp);
@@ -150,8 +152,7 @@ void setup()
   
   barPH = new BarChart(this);
   
-  livePH = 7;
-  barPH.setData(new float[] {livePH});
+
   
   barPH.setMinValue(minPH);
   barPH.setMaxValue(maxPH);
@@ -172,7 +173,7 @@ void setup()
   barStir.showValueAxis(false);
   barStir.showCategoryAxis(false);
   
-  //Line graph for Temperature
+    //Line graph for Temperature
   
   //CREATE GRAPH POINTS FOR TEMP
   GPointsArray points1 = new GPointsArray(points);
@@ -214,7 +215,7 @@ for (i = 0; i < points; i++)
   plotPH.setDim(1150, 550); 
   //Set axes limits
   plotPH.setXLim(0, totalPoints);
-  plotPH.setYLim(0, 14);
+  plotPH.setYLim(0, 50);
   //SET PLOT 1 TITLE AND AXIS LABELS
   plotPH.setTitleText(""); 
   plotPH.getXAxis().setAxisLabelText("Time (in seconds)");
@@ -314,8 +315,8 @@ if ( display_number == 1) {
   fill(100,149,237);
   limitText(lowerLimitT, paddingXTemp, minTemp, tempRange);
   
-  //BOX NEXT TO GRAPH SHOWING LIVE LEVELS
-  roundedTemp = String.format("%.2f",liveTemp);   //ROUNDS THE VALUE FOR TEMPERATURE TO 2 DECIMAL PLACES.
+  //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
+  roundedTemp = String.format("%.2f",liveTemp);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
   int rectX = paddingXTemp + barWidth + 20;
   int rectY = (paddingY + barHeight/2)-(85/2);
   fill(50);
@@ -338,7 +339,7 @@ if ( display_number == 1) {
   rect(paddingXPH, paddingY + getY(lowerLimitPH, minPH, phRange), barWidth, limitBarHeight);
   
   // Bar canvas
-  checkData(livePH, lowerLimitPH, upperLimitPH);
+  checkData(notnullPH, lowerLimitPH, upperLimitPH);
   noFill();
   strokeWeight(3);
   rect(paddingXPH, paddingY, barWidth, barHeight);
@@ -359,8 +360,8 @@ if ( display_number == 1) {
   fill(100,149,237);
   limitText(lowerLimitPH, paddingXPH, minPH, phRange);
   
-  //BOX NEXT TO GRAPH SHOWING LIVE LEVELS
-  roundedPH = String.format("%.2f",notnullPH);   //ROUNDS THE VALUE FOR PH TO 2 DECIMAL PLACES.
+  //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
+  roundedPH = String.format("%.2f",notnullPH);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
   int rectXph = paddingXPH + barWidth + 20;
   int rectYph = (paddingY + barHeight/2)-(85/2);
   fill(50);
@@ -396,8 +397,8 @@ if ( display_number == 1) {
   fill(100,149,237);
   limitText(lowerLimitS, paddingXStir, minStir, stirRange);
   
-  //BOX NEXT TO GRAPH SHOWING LIVE LEVELS
-  roundedStir = String.format("%.2f",liveStir);   //ROUNDS THE VALUE FOR STIRRING TO 2 DECIMAL PLACES.
+  //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
+  roundedStir = String.format("%.2f",liveStir);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
   int rectXstir = paddingXStir + barWidth + 20;
   int rectYstir = (paddingY + barHeight/2)-(85/2);
   fill(50);
@@ -486,7 +487,7 @@ if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT TH
   plotPH.drawTitle();
   plotPH.setPointColor(color(0,0,255));
   plotPH.getMainLayer().drawPoints();
-  //plot.drawLines();
+  //plotPH.drawLines();
   plotPH.endDraw();
 
 //CHECK IF i HAS EXCEEDED THE X AXIS LIMIT IN ORDER TO RESET IT.
@@ -495,7 +496,7 @@ if (i > totalPoints)
     i=0; //RESETS i TO ZERO.
   }
 
-/*//GET THE NEW VALUE FROM SERIAL INPUT
+//GET THE NEW VALUE FROM SERIAL INPUT
 if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT THE SAME DELAY WITH THE ARDUINO EACH TIME.
   {
       myPort.write(0);                    //SENDS THE VALUE 0 BACK TO THE ARDUINO TO TURN THE LED OFF.
@@ -520,7 +521,7 @@ if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT TH
 
   //INCREMENTS THE X AXIS VALUE.
   lastMillis += delay;
-  } */
+  }
     return_home.Draw();  
   } else if (display_number == 4) {
     // Display graph for stirring
@@ -587,12 +588,12 @@ void mousePressed()
     if(clk % 2 == 0) 
     {
       start_button.label = "START";
-      //myPort.write('1'); 
+      myPort.write('1'); 
     } 
     else 
     {
       start_button.label = "STOP";
-      //myPort.write(0); 
+      myPort.write(0); 
     }
   } else if (graph_Temp.MouseIsOver()) {
     display_number = 2;
