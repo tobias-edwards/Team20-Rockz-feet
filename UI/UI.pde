@@ -7,6 +7,7 @@ To-do list:
 - add text box to change the values (upper limits / lower limits
 - read live data DONE but does it work?
 */
+
 //Temperature Variables
 float maxTemp = 100;
 float minTemp = 0;
@@ -172,7 +173,7 @@ void setup()
   barStir.showValueAxis(false);
   barStir.showCategoryAxis(false);
   
-    //Line graph for Temperature
+  //Line graph for Temperature
   
   //CREATE GRAPH POINTS FOR TEMP
   GPointsArray points1 = new GPointsArray(points);
@@ -314,8 +315,8 @@ if ( display_number == 1) {
   fill(100,149,237);
   limitText(lowerLimitT, paddingXTemp, minTemp, tempRange);
   
-  //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
-  roundedTemp = String.format("%.2f",liveTemp);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
+  //BOX NEXT TO GRAPH SHOWING LIVE LEVELS
+  roundedTemp = String.format("%.2f",liveTemp);   //ROUNDS THE VALUE FOR TEMPERATURE TO 2 DECIMAL PLACES.
   int rectX = paddingXTemp + barWidth + 20;
   int rectY = (paddingY + barHeight/2)-(85/2);
   fill(50);
@@ -353,8 +354,8 @@ if ( display_number == 1) {
   fill(100,149,237);
   limitText(lowerLimitPH, paddingXPH, minPH, phRange);
   
-  //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
-  roundedPH = String.format("%.2f",livePH);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
+  //BOX NEXT TO GRAPH SHOWING LIVE LEVELS
+  roundedPH = String.format("%.2f",livePH);   //ROUNDS THE VALUE FOR PH TO 2 DECIMAL PLACES.
   int rectXph = paddingXPH + barWidth + 20;
   int rectYph = (paddingY + barHeight/2)-(85/2);
   fill(50);
@@ -390,8 +391,8 @@ if ( display_number == 1) {
   fill(100,149,237);
   limitText(lowerLimitS, paddingXStir, minStir, stirRange);
   
-  //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
-  roundedStir = String.format("%.2f",liveStir);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
+  //BOX NEXT TO GRAPH SHOWING LIVE LEVELS
+  roundedStir = String.format("%.2f",liveStir);   //ROUNDS THE VALUE FOR STIRRING TO 2 DECIMAL PLACES.
   int rectXstir = paddingXStir + barWidth + 20;
   int rectYstir = (paddingY + barHeight/2)-(85/2);
   fill(50);
