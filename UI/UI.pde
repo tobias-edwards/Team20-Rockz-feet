@@ -16,8 +16,8 @@ String temp;
 float liveTemp;
 String roundedTemp;
 
-float upperLimitT = 80;
-float lowerLimitT = 20;
+float upperLimitT = 35;
+float lowerLimitT = 25;
 
 //PH Variables
 float maxPH = 14;
@@ -578,6 +578,15 @@ void mousePressed()
 {
   if (start_button.MouseIsOver()) {
     clk++;
+    while (clk % 2 != 0) {
+      start_button.label = "STOP";
+      delay(1000);
+      // pause
+    } else {
+      // play
+      start_button.label = "START";
+      // call temp module
+    }
     if(clk % 2 == 0) 
     {
       start_button.label = "START";
