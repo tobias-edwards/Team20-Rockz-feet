@@ -8,7 +8,7 @@ To-do list:
 - read live data DONE but does it work?
 */
 //Temperature Variables
-float maxTemp = 100;
+float maxTemp = 50;
 float minTemp = 0;
 float tempRange = maxTemp - minTemp;
 
@@ -82,7 +82,8 @@ int i;
 long lastMillis = 0;  
 int delay = 1000;
 int totalPoints = 60;
-String tempLine,phLine,stirLine;
+String variable;
+float tempLine,phLine,stirLine;
 float notnullTemp,notnullPH,notnullStir;
 
 //Class used to create START/STOP button. 
@@ -126,8 +127,9 @@ void setup()
   size(1300,900);
   
   //Read from serial port.
-  myPort = new Serial(this,"/dev/cu.uart-F2FF54D137142D5C", 9600);
-  myPort.bufferUntil('\n');
+
+ myPort = new Serial(this,"COM4", 9600);
+ myPort.bufferUntil('\n');
   
   start_button = new Button("START", ((width/2)-125), 750, 250, 80);
   graph_Temp = new Button("GRAPH", paddingXTemp+25, 600, 150, 80);
@@ -139,8 +141,6 @@ void setup()
   
   barTemp = new BarChart(this);
   
-  liveTemp = 40;
-  barTemp.setData(new float[] {liveTemp});
   
   barTemp.setMinValue(minTemp);
   barTemp.setMaxValue(maxTemp);
@@ -163,9 +163,6 @@ void setup()
   //Bar chart for the stiring
   
   barStir = new BarChart(this);
-  
-  liveStir = 80;
-  barStir.setData(new float[] {liveStir});
   
   barStir.setMinValue(minStir);
   barStir.setMaxValue(maxStir);
@@ -315,6 +312,22 @@ if ( display_number == 1) {
   fill(100,149,237);
   limitText(lowerLimitT, paddingXTemp, minTemp, tempRange);
   
+  //GET THE NEW VALUES FROM SERIAL INPUT
+      if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
+          {                                    
+              variable = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
+                  if (variable != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                       
+                  float f = float(variable);
+                  if (f > 20 && f < 40){
+                    tempLine = f;
+                  }
+                  }
+          }
+ 
+  liveTemp = tempLine;
+  barTemp.setData(new float[] {liveTemp});
+  
   //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
   roundedTemp = String.format("%.2f",liveTemp);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
   int rectX = paddingXTemp + barWidth + 20;
@@ -344,13 +357,22 @@ if ( display_number == 1) {
   strokeWeight(3);
   rect(paddingXPH, paddingY, barWidth, barHeight);
   
-  //Values for PH
-  livePH = myPort.readStringUntil('\n');
-  if (livePH != null)                //CHECKS IF THE INPUT IS EMPTY(null).
-                  {                  
-                      notnullPH = float(livePH);
-                      barPH.setData(new float[] {notnullPH});
+  //Values for PH                 
+      if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
+          {                                    
+              variable = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
+                  if (variable != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                       
+                  float f = float(variable);
+                  if (f >= 3 && f <= 7) {
+                     phLine = f;
                   }
+                  }
+          }
+                 
+  notnullPH = phLine;
+  barPH.setData(new float[] {notnullPH});
+                  
   
   // Upper limit and lower limit text
   fill(255,0,0);
@@ -397,6 +419,22 @@ if ( display_number == 1) {
   fill(100,149,237);
   limitText(lowerLimitS, paddingXStir, minStir, stirRange);
   
+  //GET THE NEW VALUES FROM SERIAL INPUT
+
+  if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
+          {                                    
+              variable = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
+                  if (variable != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                       
+                  float f = float(variable);
+                  if (f > 1000){
+                    stirLine = f;
+                  }
+           }
+          }
+  liveStir = stirLine;
+  barStir.setData(new float[] {liveStir});
+           
   //BOX NEXT TO GRAPH SHOWING LIVE LIGHT LEVELS
   roundedStir = String.format("%.2f",liveStir);   //ROUNDS THE VALUE FOR ILLUMINANCE TO 0 DECIMAL PLACES.
   int rectXstir = paddingXStir + barWidth + 20;
@@ -441,20 +479,20 @@ if (i > totalPoints)
     i=0; //RESETS i TO ZERO.
   }
 
-/*//GET THE NEW VALUE FROM SERIAL INPUT
+//GET THE NEW VALUE FROM SERIAL INPUT
+//GET THE NEW VALUES FROM SERIAL INPUT
 if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT THE SAME DELAY WITH THE ARDUINO EACH TIME.
-  {
-      myPort.write(0);                    //SENDS THE VALUE 0 BACK TO THE ARDUINO TO TURN THE LED OFF.
+  {                    
       if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
           {                                    
-              tempLine = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
-                  if (tempLine != null)                //CHECKS IF THE INPUT IS EMPTY(null).
-                  {                  
-                      println(tempLine);                       //IF ITS NOT EMPYT IT PRINTS THE VALUE.
-                      notnullTemp = float(tempLine);           //CONVERTS THE INPUT FROM STRING TO A FLOAT SO THAT IT CAN BE PLOT AND STORE IT IN notnullTemp.(MAYBE CHANGE IT TO DOUBLE)
+              variable = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
+                  if (variable != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                       
+                  float f = float(variable);
+                  if (f > 20 && f < 40){
+                    tempLine = f;
                   }
- 
-          }  
+   }  
   
 
   //ADD THE NEW POINT AT THE END OF THE ARRAY.
@@ -466,7 +504,7 @@ if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT TH
 
   //INCREMENTS THE X AXIS VALUE.
   lastMillis += delay;
-  } */
+  } 
     
     return_home.Draw();
   } else if (display_number == 3) {
@@ -496,20 +534,21 @@ if (i > totalPoints)
     i=0; //RESETS i TO ZERO.
   }
 
-//GET THE NEW VALUE FROM SERIAL INPUT
+//GET THE NEW VALUES FROM SERIAL INPUT
 if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT THE SAME DELAY WITH THE ARDUINO EACH TIME.
-  {
-      myPort.write(0);                    //SENDS THE VALUE 0 BACK TO THE ARDUINO TO TURN THE LED OFF.
+  {                    
       if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
           {                                    
-              phLine = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
-                  if (phLine != null)                //CHECKS IF THE INPUT IS EMPTY(null).
-                  {                  
-                      println(phLine);                       //IF ITS NOT EMPYT IT PRINTS THE VALUE.
-                      notnullPH = float(phLine);           //CONVERTS THE INPUT FROM STRING TO A FLOAT SO THAT IT CAN BE PLOT AND STORE IT IN notnullTemp.(MAYBE CHANGE IT TO DOUBLE)
+              variable = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
+                  if (variable != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                       
+                  float f = float(variable);
+                  if (f >= 3 && f <= 7) {
+                     phLine = f;
                   }
- 
-          }  
+
+          }
+   }  
   
 
   //ADD THE NEW POINT AT THE END OF THE ARRAY.
@@ -550,22 +589,21 @@ if (i > totalPoints)
     i=0; //RESETS i TO ZERO.
   }
 
-/*//GET THE NEW VALUE FROM SERIAL INPUT
+//GET THE NEW VALUES FROM SERIAL INPUT
 if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT THE SAME DELAY WITH THE ARDUINO EACH TIME.
-  {
-      myPort.write(0);                    //SENDS THE VALUE 0 BACK TO THE ARDUINO TO TURN THE LED OFF.
+  {                    
       if ( myPort.available() > 0)       //CHECKS IF DATA ARE AVAILABLE IN THE ARDUINO PORT.       
           {                                    
-              stirLine = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
-                  if (stirLine != null)                //CHECKS IF THE INPUT IS EMPTY(null).
-                  {                  
-                      println(stirLine);                       //IF ITS NOT EMPYT IT PRINTS THE VALUE.
-                      notnullStir = float(stirLine);           //CONVERTS THE INPUT FROM STRING TO A FLOAT SO THAT IT CAN BE PLOT AND STORE IT IN notnullTemp.(MAYBE CHANGE IT TO DOUBLE)
+              variable = myPort.readStringUntil('\n'); //READS THE WHOLE LINE AND STORES IT IN temp.
+                  if (variable != null)                //CHECKS IF THE INPUT IS EMPTY(null).
+                  {                       
+                  float f = float(variable);
+                  if (f > 1000){
+                    stirLine = f;
                   }
+           }
  
-          }  
-  
-
+ }  
   //ADD THE NEW POINT AT THE END OF THE ARRAY.
    i++;
   plotStir.addPoint(i,notnullStir);
@@ -575,9 +613,10 @@ if ( lastMillis + delay < millis())      //IF FUNCTION USED TO IMPORT DATA AT TH
 
   //INCREMENTS THE X AXIS VALUE.
   lastMillis += delay;
-  } */
+  } 
     
     return_home.Draw();
+  }
   }
 }
 
@@ -585,15 +624,6 @@ void mousePressed()
 {
   if (start_button.MouseIsOver()) {
     clk++;
-    while (clk % 2 != 0) {
-      start_button.label = "STOP";
-      delay(1000);
-      // pause
-    } else {
-      // play
-      start_button.label = "START";
-      // call temp module
-    }
     if(clk % 2 == 0) 
     {
       start_button.label = "START";
